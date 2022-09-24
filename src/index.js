@@ -15,32 +15,27 @@ class Board extends React.Component {
     renderSquare(i) {
         return (
             <Square
+                key={"square " + i}
                 value={this.props.squares[i]}
                 onClick={() => this.props.onClick(i)}
             />
         );
     }
 
+    renderRows() {
+        const rows = [];
+        for (let i = 0; i < 3; i++) {
+            const row = [];
+            for (let j = 0; j < 3; j++) {
+                row.push(this.renderSquare(i * 3 + j));
+            }
+            rows.push(<div key={"row" + i} className='board-row'>{row}</div>);
+        }
+        return rows;
+    }
+
     render() {
-        return (
-            <div>
-                <div className="board-row">
-                    {this.renderSquare(0)}
-                    {this.renderSquare(1)}
-                    {this.renderSquare(2)}
-                </div>
-                <div className="board-row">
-                    {this.renderSquare(3)}
-                    {this.renderSquare(4)}
-                    {this.renderSquare(5)}
-                </div>
-                <div className="board-row">
-                    {this.renderSquare(6)}
-                    {this.renderSquare(7)}
-                    {this.renderSquare(8)}
-                </div>
-            </div>
-        );
+        return <div>{this.renderRows()}</div>;
     }
 }
 
@@ -71,6 +66,7 @@ class Game extends React.Component {
             }],
             stepNumber: 0,
             xIsNext: true,
+            isDescending: true
         };
     }
 
@@ -79,6 +75,12 @@ class Game extends React.Component {
             stepNumber: step,
             xIsNext: (step % 2) === 0,
         })
+    }
+
+    sortHistory() {
+        this.setState({
+            isDescending: !this.state.isDescending
+        });
     }
 
     handleClick(i) {
@@ -113,7 +115,9 @@ class Game extends React.Component {
             const desc = move ? 'Go to move #' + move + ', (' + location.x + ', ' + location.y + ')' : 'Go to game start';
             return (
                 <li key={move}>
-                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
+                    <button onClick={() => this.jumpTo(move)}>
+                        {move === this.state.stepNumber ? <b>{desc}</b> : desc}
+                    </button>
                 </li>
             );
         });
@@ -134,7 +138,10 @@ class Game extends React.Component {
                 </div>
                 <div className="game-info">
                     <div>{status}</div>
-                    <ol>{moves}</ol>
+                    <ol>{this.state.isDescending ? moves : moves.reverse()}</ol>
+                    <button onClick={() => this.sortHistory()}>
+                        Sort by: {this.state.isDescending ? "Descending" : "Ascending"}
+                    </button>
                 </div>
             </div>
         );
